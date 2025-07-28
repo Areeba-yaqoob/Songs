@@ -118,52 +118,64 @@
   <audio id="audio4" src="music/Mushk - Ali Zafar [128 Kbps]-(SongsPk.com.se).mp3"></audio>
 
   <script>
-    const boxes = document.querySelectorAll(".box");
-    const audios = {
-      audio1: document.getElementById("audio1"),
-      audio2: document.getElementById("audio2"),
-      audio3: document.getElementById("audio3"),
-      audio4: document.getElementById("audio4")
-    };
+  const boxes = document.querySelectorAll(".box");
+  const audios = {
+    audio1: document.getElementById("audio1"),
+    audio2: document.getElementById("audio2"),
+    audio3: document.getElementById("audio3"),
+    audio4: document.getElementById("audio4")
+  };
 
-    let currentAudio = null;
-    let currentBox = null;
+  let currentAudio = null;
+  let currentBox = null;
 
-    // Stop all audios and remove rotation
-    function stopAll() {
-      Object.values(audios).forEach(audio => {
+  function stopAll() {
+    Object.values(audios).forEach(audio => {
+      audio.pause();
+      audio.currentTime = 0;
+    });
+
+    boxes.forEach(box => box.classList.remove("rotating"));
+    document.querySelectorAll(".audio-btn").forEach(btn => {
+      btn.style.display = "none";
+      btn.innerText = "🔊";
+    });
+  }
+
+  boxes.forEach(box => {
+    const btn = box.querySelector(".audio-btn");
+    const audioId = box.getAttribute("data-audio");
+    const audio = audios[audioId];
+
+    // Hovering over box starts the audio
+    box.addEventListener("mouseenter", () => {
+      if (currentAudio !== audio) {
+        stopAll();
+        audio.play();
+        box.classList.add("rotating");
+        btn.innerText = "🔇"; // Show stop icon
+        btn.style.display = "flex";
+        currentAudio = audio;
+        currentBox = box;
+      }
+    });
+
+    // Click on stop button stops the audio
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (audio === currentAudio) {
         audio.pause();
         audio.currentTime = 0;
-      });
-
-      boxes.forEach(box => box.classList.remove("rotating"));
-      const allBtns = document.querySelectorAll(".audio-btn");
-      allBtns.forEach(btn => btn.innerText = "🔊");
-    }
-
-    boxes.forEach(box => {
-      const btn = box.querySelector(".audio-btn");
-      const audioId = box.getAttribute("data-audio");
-      const audio = audios[audioId];
-
-      btn.addEventListener("click", (e) => {
-        e.stopPropagation(); // avoid click propagation to parent
-
-        if (audio.paused) {
-          stopAll();
-          audio.play();
-          box.classList.add("rotating");
-          btn.innerText = "🔊";
-          currentAudio = audio;
-          currentBox = box;
-        } else {
-          audio.pause();
-          box.classList.remove("rotating");
-          btn.innerText = "🔇";
-        }
-      });
+        box.classList.remove("rotating");
+        btn.innerText = "🔊"; // Show play icon again
+        btn.style.display = "none";
+        currentAudio = null;
+        currentBox = null;
+      }
     });
-  </script>
+  });
+</script>
+
 
 </body>
 </html>
